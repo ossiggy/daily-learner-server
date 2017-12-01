@@ -1,7 +1,11 @@
+import {router as userRouter} from './users';
+import {router as articleRouter} from './articles';
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-
+const {User} = require('./users');
+const {Article} = require('./articles')
 const {PORT, CLIENT_ORIGIN} = require('./config');
 const {dbConnect} = require('./db-mongoose');
 
@@ -18,6 +22,9 @@ app.use(
         origin: CLIENT_ORIGIN
     })
 );
+
+app.use('/api/users/', userRouter);
+app.use('/api/article', articleRouter);
 
 function runServer(port = PORT) {
     const server = app
