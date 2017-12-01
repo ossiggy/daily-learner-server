@@ -1,4 +1,4 @@
-const {router} = require('./budgetRouter')
+const {router} = require('./userRouter')
 const {User} = require('./models')
 
 module.exports = {router, User}

@@ -17,7 +17,7 @@ const UserSchema = mongoose.Schema({
   firstName: {type: String, default: ''},
   lastName: {type: String, default: ''},
   email: {type: mongoose.SchemaTypes.Email, required: true},
-  posts: [{type: mongoose.Schema.Types.ObjectId, ref:'Post'}]
+  articles: [{type: mongoose.Schema.Types.ObjectId, ref:'Article'}]
 });
 
 UserSchema.methods.apiRepr = function() {
