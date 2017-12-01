@@ -24,7 +24,7 @@ app.use(
 );
 
 app.use('/api/users/', userRouter);
-app.use('/api/article', articleRouter);
+app.use('/api/articles', articleRouter);
 
 function runServer(port = PORT) {
     const server = app

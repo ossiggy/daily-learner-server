@@ -27,18 +27,9 @@ router.get('/articles', (req, res) => {
     })
 })
 
-router.get('/articles/:userId', (req, res) => {
+router.get('/articles/:id', (req, res) => {
   if(!Article){
-    Article.findOne({})
-    .exec(function(err){
-      if(err) return "error";
-    })
-    .then(
-      article => res.json(article.apiRepr()))
-    .catch(err => {
-      console.error(err);
-      res.status(500).json({error: 'something went wrong'})
-    })
+    res.status(404)//this correct?
   }
   else{
     Article.findOne({'_parent': req.params.userId}, {}, {sort: {'_id':-1}})
