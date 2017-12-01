@@ -8,6 +8,6 @@ const ArticleSchema = mongoose.Schema({
    tags: [{type: String, required: true}]
 });
 
-const Post = mongoose.model('Article', ArticleSchema);
+const Article = mongoose.model('Article', ArticleSchema);
 
 module.exports = {Article}

@@ -8,7 +8,7 @@ const router = express.Router();
 const {Article} = require('./models')
 const {User} = require('../users')
 
-router.use(cookieParser())
+// router.use(cookieParser())
 
 mongoose.Promise=global.Promise;
 
@@ -28,8 +28,8 @@ router.get('/articles', (req, res) => {
 })
 
 router.get('/articles/:id', (req, res) => {
-  if(!Article){
-    res.status(404)//this correct?
+  if(!Article) { 
+    res.status(404).json({error: 'Article not found'})
   }
   else{
     Article.findOne({'_parent': req.params.userId}, {}, {sort: {'_id':-1}})
@@ -104,4 +104,4 @@ router.delete('/articles/:id', (req, res) => {
     .catch(err => res.status(500).json({message: 'Inernal server error'}))
 })
 
-module.exports = router;
+module.exports = {router};
