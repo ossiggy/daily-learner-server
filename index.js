@@ -9,6 +9,10 @@ const {Article} = require('./articles')
 const {PORT, CLIENT_ORIGIN} = require('./config');
 const {dbConnect} = require('./db-mongoose');
 
+const {users, articles} = require('./dummy-data.json');
+
+// console.log(users);
+
 const app = express();
 
 app.use(
@@ -24,7 +28,8 @@ app.use(
 );
 
 app.use('/api/users/', userRouter);
-app.use('/api/articles', articleRouter);
+app.use('/api/articles/', articleRouter);
+
 
 function runServer(port = PORT) {
     const server = app

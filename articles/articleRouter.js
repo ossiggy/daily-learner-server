@@ -12,7 +12,7 @@ const {User} = require('../users')
 
 mongoose.Promise=global.Promise;
 
-router.get('/articles', (req, res) => {
+router.get('/', (req, res) => {
   Article
     .find()
     .exec(function(err){
@@ -27,7 +27,7 @@ router.get('/articles', (req, res) => {
     })
 })
 
-router.get('/articles/:id', (req, res) => {
+router.get('/:id', (req, res) => {
   if(!Article) { 
     res.status(404).json({error: 'Article not found'})
   }
@@ -45,7 +45,7 @@ router.get('/articles/:id', (req, res) => {
       }
   })
 
-router.post('/articles', (req, res) => {
+router.post('/', jsonParser, (req, res) => {
   const requiredFields = ['title', 'content', 'dateCreated', 'tags']
   for(let i=0; i<requiredFields.length; i++){
     const field = requiredFields[i]
@@ -55,24 +55,24 @@ router.post('/articles', (req, res) => {
       console.error(message)
     }
   }
-  const {title, content, dateCreated, tags} = req.body
+  const {title, content, dateCreated, tags, _parent} = req.body
 
 Article
   .create({
-    _parent: req.cookies.userId,
+    _parent,
     title,
     content,
     dateCreated,
     tags
   })
-    .then(article => res.status(204).end())
+    .then(article => res.status(204).json(article.apiRepr))
     .catch(err => {
         console.error(err)
         res.status(500).json({message: 'Internal server error'})
       })   
 })
 
-router.put('articles/:id', (req, res) => {
+router.put('/:id', (req, res) => {
   if(!(req.params.id && req.body.id && req.params.id)){
     const message = (
       `Request patch id (${req.params.id} and request body id (${req.body.id}) must match)`)
@@ -96,7 +96,7 @@ router.put('articles/:id', (req, res) => {
     .catch(err => res.status(500).json({message: 'Internal server error'}))
 })
 
-router.delete('/articles/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
   Article
     .findByIdAndRemove(req.params.id)
     .exec()
