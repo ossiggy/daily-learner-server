@@ -13,11 +13,15 @@
   "author": "Joe Turner <jturner@thinkful.com>",
   "license": "MIT",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
     "express": "^4.15.4",
     "knex": "^0.13.0",
     "mongoose": "^4.11.12",
+    "mongoose-type-email": "^1.0.5",
     "morgan": "^1.8.2",
+    "passport": "^0.4.0",
     "pg": "^7.3.0"
   },
   "devDependencies": {
