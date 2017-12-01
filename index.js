@@ -1,5 +1,5 @@
-import {router as userRouter} from './users';
-import {router as articleRouter} from './articles';
+const {router: userRouter} = require('./users');
+const {router: articleRouter} = require('./articles');
 
 const express = require('express');
 const cors = require('cors');
