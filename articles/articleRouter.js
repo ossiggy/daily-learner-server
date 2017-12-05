@@ -65,7 +65,7 @@ Article
     dateCreated,
     tags
   })
-    .then(article => res.status(204).json(article.apiRepr))
+    .then(article => res.status(201).json(article.apiRepr()))
     .catch(err => {
         console.error(err)
         res.status(500).json({message: 'Internal server error'})

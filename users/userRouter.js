@@ -9,7 +9,7 @@ const jsonParser = bodyParser.json();
 const {User} = require('./models');
 const {Article} = require('../articles')
 
-router.get('/:id', (req, res) => {
+router.get('/', (req, res) => {
 
   const {userId, authToken} = req.cookies;
 
@@ -25,7 +25,7 @@ router.get('/:id', (req, res) => {
     .then(user => res.status(204).send('here'))
 })
 
-router.post('/newuser', jsonParser, (req, res) => {
+router.post('/', jsonParser, (req, res) => {
   const requiredFields = ['username', 'password', 'email', 'firstName', 'lastName'];
   const missingField = requiredFields.find(field => !(field in req.body));
 
@@ -72,7 +72,7 @@ router.post('/newuser', jsonParser, (req, res) => {
       max: 15
     },
     password: {
-      min: 4,
+      min: 7,
       max: 72
     }
   };
