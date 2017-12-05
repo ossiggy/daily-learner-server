@@ -22,6 +22,8 @@
     "mongoose-type-email": "^1.0.5",
     "morgan": "^1.8.2",
     "passport": "^0.4.0",
+    "passport-jwt": "^3.0.1",
+    "passport-local": "^1.0.0",
     "pg": "^7.3.0"
   },
   "devDependencies": {
