@@ -9,27 +9,28 @@ const jsonParser = bodyParser.json();
 const {User} = require('./models');
 const {Article} = require('../articles')
 
-router.get('/', (req, res) => {
+// router.get('/', (req, res) => {
 
-  const {userId, authToken} = req.cookies;
+//   const {userId, authToken} = req.cookies;
 
-  User
-    .findById(userId)
-    .populate({
-      path: 'article',
-      model: 'Article',
-    })
-    .exec(function(err, doc){
-      res.send(doc)
-    })
-    .then(user => res.status(204).send('here'))
-})
+//   User
+//     .findById(userId)
+//     .populate({
+//       path: 'article',
+//       model: 'Article',
+//     })
+//     .exec(function(err, doc){
+//       res.send(doc)
+//     })
+//     .then(user => res.status(204).send('here'))
+// })
 
 router.post('/', jsonParser, (req, res) => {
   const requiredFields = ['username', 'password', 'email', 'firstName', 'lastName'];
   const missingField = requiredFields.find(field => !(field in req.body));
 
   if(missingField) {
+    console.log('missing field')
     return res.status(422).json({
       code: 422,
       reason: 'ValidationError',
@@ -44,6 +45,7 @@ router.post('/', jsonParser, (req, res) => {
   );
 
   if(nonStringField) {
+    console.log('non string field')
     return res.status(422).json({
       code: 422,
       reason: 'ValidationError',
@@ -58,6 +60,7 @@ router.post('/', jsonParser, (req, res) => {
   );
 
   if(nonTrimmedField) {
+    console.log('non trimmed field')
     return res.status(422).json({
       code: 422,
       reason: 'ValidationError',
@@ -88,6 +91,7 @@ router.post('/', jsonParser, (req, res) => {
   );
 
   if (tooSmallField || tooLargeField){
+    console.log('too large or too small')
     return res.status(422).json({
       code: 422,
       reason: 'ValidationError',
@@ -108,6 +112,7 @@ router.post('/', jsonParser, (req, res) => {
     .count()
     .then(count => {
       if(count > 0) {
+        console.log('user exists')
         return Promise.reject({
           code: 422,
           reason: 'ValidationError',
@@ -130,7 +135,8 @@ router.post('/', jsonParser, (req, res) => {
       return res.status(201).json(user.apiRepr())
     })
     .catch(err => {
-      console.log(err)
+      // console.log(err)
+      console.log('user post error')
       if(err.reason === 'ValidationError'){
         return res.status(err.code).json(err)
       }

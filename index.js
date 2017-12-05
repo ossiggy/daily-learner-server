@@ -1,5 +1,6 @@
 const {router: userRouter} = require('./users');
 const {router: articleRouter} = require('./articles');
+const {router: authRouter} = require('./auth');
 
 const express = require('express');
 const cors = require('cors');
@@ -29,6 +30,7 @@ app.use(
 
 app.use('/api/users/', userRouter);
 app.use('/api/articles/', articleRouter);
+app.use('/api/auth', authRouter);
 
 
 function runServer(port = PORT) {
