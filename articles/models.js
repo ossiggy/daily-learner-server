@@ -11,6 +11,7 @@ const ArticleSchema = mongoose.Schema({
 ArticleSchema.methods.apiRepr = function() {
   return {
     _parent: this._parent || '',
+    id: this._id || '',
     title: this.title || '',
     content: this.content || '',
     dateCreated: this.dateCreated || '',

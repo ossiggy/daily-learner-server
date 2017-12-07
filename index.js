@@ -1,8 +1,9 @@
 const {router: userRouter} = require('./users');
 const {router: articleRouter} = require('./articles');
-const {router: authRouter} = require('./auth');
+const {router: authRouter, localStrategy, jwtStrategy} = require('./auth');
 
 const express = require('express');
+const passport = require('passport')
 const cors = require('cors');
 const morgan = require('morgan');
 const {User} = require('./users');
@@ -27,6 +28,9 @@ app.use(
         origin: CLIENT_ORIGIN
     })
 );
+
+passport.use(localStrategy);
+passport.use(jwtStrategy);
 
 app.use('/api/users/', userRouter);
 app.use('/api/articles/', articleRouter);

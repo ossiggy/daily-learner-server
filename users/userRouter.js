@@ -9,21 +9,21 @@ const jsonParser = bodyParser.json();
 const {User} = require('./models');
 const {Article} = require('../articles')
 
-// router.get('/', (req, res) => {
+router.get('/', (req, res) => {
 
-//   const {userId, authToken} = req.cookies;
+  const {userId, authToken} = req.cookies;
 
-//   User
-//     .findById(userId)
-//     .populate({
-//       path: 'article',
-//       model: 'Article',
-//     })
-//     .exec(function(err, doc){
-//       res.send(doc)
-//     })
-//     .then(user => res.status(204).send('here'))
-// })
+  User
+    .findById(userId)
+    .populate({
+      path: 'article',
+      model: 'Article',
+    })  
+    .exec(function(err, doc){
+      res.send(doc)
+    })
+    .then(user => res.status(204).send('here'))
+})
 
 router.post('/', jsonParser, (req, res) => {
   const requiredFields = ['username', 'password', 'email', 'firstName', 'lastName'];
