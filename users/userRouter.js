@@ -1,7 +1,7 @@
 const express = require('express')
 const passport = require('passport')
 const bodyParser = require('body-parser')
-
+const cookieParsser = require('cookie-parser')
 const router = express.Router();
 
 const jsonParser = bodyParser.json();
@@ -11,10 +11,8 @@ const {Article} = require('../articles')
 
 router.get('/', (req, res) => {
 
-  const {userId, authToken} = req.cookies;
-
   User
-    .findById(userId)
+    .find()
     .populate({
       path: 'article',
       model: 'Article',

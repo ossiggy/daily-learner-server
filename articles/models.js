@@ -4,7 +4,7 @@ const ArticleSchema = mongoose.Schema({
   _parent:{type: mongoose.Schema.Types.ObjectId, ref: 'User'},
    title: {type: String, required: true},
    content: {type: String, required: true},
-   dateCreated: {type: Date, required: true},
+   dateCreated: {type: Date, required: false},
    tags: [{type: String, required: true}]
 });
 

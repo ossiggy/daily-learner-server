@@ -8,8 +8,6 @@ const router = express.Router();
 const {Article} = require('./models')
 const {User} = require('../users')
 
-// router.use(cookieParser())
-
 mongoose.Promise=global.Promise;
 
 router.get('/', (req, res) => {
@@ -27,12 +25,12 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/:id', (req, res) => {
+router.get('/:id', (req, res) => { //put auth middleware
   if(!Article) { 
     res.status(404).json({error: 'Article not found'})
   }
   else{
-    Article.findOne({'_parent': req.params.userId}, {}, {sort: {'_id':-1}})
+    Article.findById(req.params.id)
         .exec(function(err){
           if(err) return "error";
         })
@@ -46,7 +44,7 @@ router.get('/:id', (req, res) => {
   })
 
 router.post('/', jsonParser, (req, res) => {
-  const requiredFields = ['title', 'content', 'dateCreated', 'tags']
+  const requiredFields = ['title', 'content', 'tags']
   for(let i=0; i<requiredFields.length; i++){
     const field = requiredFields[i]
     if(!(field in req.body)){
@@ -55,14 +53,12 @@ router.post('/', jsonParser, (req, res) => {
       console.error(message)
     }
   }
-  const {title, content, dateCreated, tags, _parent} = req.body
-
+  const {title, content, tags, _parent} = req.body
 Article
   .create({
     _parent,
     title,
     content,
-    dateCreated,
     tags
   })
     .then(article => res.status(201).json(article.apiRepr()))

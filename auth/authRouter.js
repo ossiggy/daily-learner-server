@@ -3,6 +3,7 @@ const express = require('express');
 const passport = require('passport');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const cookieParsser = require('cookie-parser')
 
 const config = require('../config');
 const router = express.Router();
@@ -20,14 +21,15 @@ router.use(bodyParser.json());
 router.post('/login', localAuth, (req, res) => {
   console.log(req.user)
   const authToken = createAuthToken(req.user.apiRepr());
-  res.json({authToken});
+  // res.cookie('userId', req.user.apiRepr().id);
+  res.json({authToken, userId: req.user.apiRepr().id});
 });
 
 const jwtAuth = passport.authenticate('jwt', {session: false});
 
 router.post('/refresh', jwtAuth, (req, res) => {
   const authToken = createAuthToken(req.user);
-  res.json({authToken});
+  res.json({authToken})
 });
 
 module.exports = {router};
