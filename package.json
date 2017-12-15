@@ -14,11 +14,12 @@
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
     "express": "^4.15.4",
     "knex": "^0.13.0",
-    "mongoose": "^4.11.12",
+    "mongoose": "^4.13.7",
     "mongoose-type-email": "^1.0.5",
     "morgan": "^1.8.2",
     "passport": "^0.4.0",

@@ -4,7 +4,7 @@ const ArticleSchema = mongoose.Schema({
   _parent:{type: mongoose.Schema.Types.ObjectId, ref: 'User'},
    title: {type: String, required: true},
    content: {type: String, required: true},
-   dateCreated: {type: Date, required: false},
+   dateCreated: {type: Date, default: Date.now, required: false},
    tags: [{type: String, required: true}]
 });
 
@@ -14,7 +14,7 @@ ArticleSchema.methods.apiRepr = function() {
     id: this._id || '',
     title: this.title || '',
     content: this.content || '',
-    dateCreated: this.dateCreated || '',
+    dateCreated: this.dateCreated.toDateString() || '',
     tags: this.tags || ''
   };
 };
