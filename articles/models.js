@@ -5,7 +5,7 @@ const ArticleSchema = mongoose.Schema({
    title: {type: String, required: true},
    content: {type: String, required: true},
    dateCreated: {type: Date, default: Date.now, required: false},
-   tags: [{type: String, required: true}]
+   category: {type: String, required: true}
 });
 
 ArticleSchema.methods.apiRepr = function() {
@@ -15,7 +15,7 @@ ArticleSchema.methods.apiRepr = function() {
     title: this.title || '',
     content: this.content || '',
     dateCreated: this.dateCreated.toDateString() || '',
-    tags: this.tags || ''
+    category: this.category || ''
   };
 };
 

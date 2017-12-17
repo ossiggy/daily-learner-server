@@ -44,7 +44,7 @@ router.get('/:id', (req, res) => { //put auth middleware
   })
 
 router.post('/', jsonParser, (req, res) => {
-  const requiredFields = ['title', 'content', 'tags']
+  const requiredFields = ['title', 'content', 'category']
   for(let i=0; i<requiredFields.length; i++){
     const field = requiredFields[i]
     if(!(field in req.body)){
@@ -53,13 +53,14 @@ router.post('/', jsonParser, (req, res) => {
       console.error(message)
     }
   }
-  const {title, content, tags, _parent} = req.body
+  const {title, content, category, _parent} = req.body
+  
 Article
   .create({
     _parent,
     title,
     content,
-    tags
+    category
   })
     .then(article => res.status(201).json(article.apiRepr()))
     .catch(err => {
@@ -77,7 +78,7 @@ router.put('/:id', (req, res) => {
   }
 
   const toUpdate = {}
-  const updateableFields = ['title', 'content', 'tags']
+  const updateableFields = ['title', 'content', 'category']
 
   updateableFields.forEach(field => {
     if (field in req.body) {
