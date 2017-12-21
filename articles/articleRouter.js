@@ -69,7 +69,8 @@ Article
       })   
 })
 
-router.put('/:id', (req, res) => {
+router.put('/:id', jsonParser, (req, res) => {
+  console.log(req.body)
   if(!(req.params.id && req.body.id && req.params.id)){
     const message = (
       `Request patch id (${req.params.id} and request body id (${req.body.id}) must match)`)
@@ -87,7 +88,7 @@ router.put('/:id', (req, res) => {
   })
 
   Article
-    .findOneAndUpdate({_parent:req.params.userId}, {$set: toUpdate}, {new: true})
+    .findOneAndUpdate({_id:req.params.id}, {$set: toUpdate}, {new: true})
     .exec()
     .then(post => res.status(204).end())
     .catch(err => res.status(500).json({message: 'Internal server error'}))
