@@ -4,15 +4,17 @@ const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 const cookieParser = require('cookie-parser');
 
+const {jwtAuth} = require('../auth');
+
 const router = express.Router();
-const {Article} = require('./models')
+const {Article} = require('./models');
 const {User} = require('../users')
 
 mongoose.Promise=global.Promise;
 
-router.get('/', (req, res) => {
+router.get('/', jwtAuth, (req, res) => {
   Article
-    .find()
+    .find({_parent: req.user.id})
     .exec(function(err){
       if(err) return 'error';
     })
@@ -25,7 +27,7 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/:id', (req, res) => { //put auth middleware
+router.get('/:id', jwtAuth, (req, res) => { //put auth middleware
   if(!Article) { 
     res.status(404).json({error: 'Article not found'})
   }

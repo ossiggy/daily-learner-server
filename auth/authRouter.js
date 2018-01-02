@@ -19,9 +19,7 @@ const createAuthToken = function(user) {
 const localAuth = passport.authenticate('local', {session: false});
 router.use(bodyParser.json());
 router.post('/login', localAuth, (req, res) => {
-  console.log(req.user)
   const authToken = createAuthToken(req.user.apiRepr());
-  // res.cookie('userId', req.user.apiRepr().id);
   res.json({authToken, userId: req.user.apiRepr().id});
 });
 
@@ -32,4 +30,4 @@ router.post('/refresh', jwtAuth, (req, res) => {
   res.json({authToken})
 });
 
-module.exports = {router};
+module.exports = {router, jwtAuth};
