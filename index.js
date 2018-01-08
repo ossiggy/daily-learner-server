@@ -1,3 +1,5 @@
+'use strict';
+
 const {router: userRouter} = require('./users');
 const {router: articleRouter} = require('./articles');
 const {router: authRouter, localStrategy, jwtStrategy} = require('./auth');
