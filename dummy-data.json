@@ -1,25 +1,9 @@
 {
   "users": [{
-    "username": "Ossiggy",
+    "id": "5a25b9b5a478d95710949362",
+    "username": "DemoMode",
     "password": "password",
     "email": "email@email.com",
-    "firstName": "Mike",
-    "lastName": "Ossig",
     "articles": []
-  }],
-
-  "articles": [{
-    "_parent": "5a25b9b5a478d95710949362",
-    "title": "title",
-    "content": "content",
-    "dateCreated": "21 November 2017",
-    "tags": ["1", "2", "3"]
-  },
-  {   
-    "_parent": "5a25b9b5a478d95710949362", 
-    "title": "title2",
-    "content": "content2",
-    "dateCreated": "21 November 2017",
-    "tags": ["1", "2", "3", "4"]
   }]
 }

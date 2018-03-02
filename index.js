@@ -19,17 +19,23 @@ const {users, articles} = require('./dummy-data.json');
 
 const app = express();
 
-app.use(
-    morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev', {
-        skip: (req, res) => process.env.NODE_ENV === 'test'
-    })
-);
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 app.use(
     cors({
         origin: CLIENT_ORIGIN
     })
 );
+app.use(
+    morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev', {
+        skip: (req, res) => process.env.NODE_ENV === 'test'
+    })
+);
+
 
 passport.use(localStrategy);
 passport.use(jwtStrategy);

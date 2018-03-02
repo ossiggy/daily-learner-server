@@ -1,0 +1,17 @@
+{
+    "articles": [{
+    "_parent": "5a25b9b5a478d95710949362",
+    "_id": "68ab3345d06847a483775",
+    "title": "React",
+    "content": "Today in school, I mastered React.js.",
+    "dateCreated": "21 November 2017",
+    "category": "school"
+  },
+  {   
+    "_parent": "5a25b9b5a478d95710949362", 
+    "title": "Ego",
+    "content": "Killing your ego is the key to a happier life.",
+    "dateCreated": "21 November 2017",
+    "category": "spritual"
+  }]
+}
