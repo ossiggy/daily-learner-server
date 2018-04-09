@@ -11,5 +11,3 @@ module.exports = {
   JWT_SECRET: process.env.JWT_SECRET || 'DAILY_LEARNER',
   JWT_EXPIRY: process.env.JWT_EXPIRY || '7d'
 };
-
-// configure heroku env variable to pull data from mLab

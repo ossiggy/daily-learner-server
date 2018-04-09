@@ -15,8 +15,6 @@ const {dbConnect} = require('./db-mongoose');
 
 const {users, articles} = require('./dummy-data.json');
 
-// console.log(users);
-
 const app = express();
 
 app.use(function(req, res, next) {
@@ -43,7 +41,6 @@ passport.use(jwtStrategy);
 app.use('/api/users/', userRouter);
 app.use('/api/articles/', articleRouter);
 app.use('/api/auth', authRouter);
-
 
 function runServer(port = PORT) {
     const server = app
