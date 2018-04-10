@@ -29,7 +29,7 @@ app.use(
     })
 );
 app.use(
-    morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev', {
+    morgan(process.env.NODE_ENV === 'production' ? 'common :method :res[headers] :req[headers]' : 'dev', {
         skip: (req, res) => process.env.NODE_ENV === 'test'
     })
 );

@@ -29,7 +29,7 @@ router.get('/', jwtAuth, (req, res) => {
     });
 });
 
-router.get('/:id', jwtAuth, (req, res) => { //put auth middleware
+router.get('/:id', jwtAuth, (req, res) => {
   if(!Article) { 
     res.status(404).json({error: 'Article not found'});
   }
