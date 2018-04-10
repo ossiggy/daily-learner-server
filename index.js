@@ -10,7 +10,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const {User} = require('./users');
 const {Article} = require('./articles')
-const {PORT, CLIENT_ORIGIN} = require('./config');
+const {PORT, CLIENT_ORIGIN, DATABASE_URL} = require('./config');
 const {dbConnect} = require('./db-mongoose');
 
 const {users, articles} = require('./dummy-data.json');
@@ -42,10 +42,13 @@ app.use('/api/users/', userRouter);
 app.use('/api/articles/', articleRouter);
 app.use('/api/auth', authRouter);
 
+let server;
+
 function runServer(databaseUrl=DATABASE_URL, port=PORT) {
   
     return new Promise((resolve, reject) => {
-      mongoose.connect(databaseUrl, err =>{
+      mongoose.connect(databaseUrl, {useMongoClient: true}, err =>{
+        
         if (err) {
           return reject(err);
         }
