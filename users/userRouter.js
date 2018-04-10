@@ -4,12 +4,14 @@ const bodyParser = require('body-parser')
 const cookieParsser = require('cookie-parser')
 const router = express.Router();
 
+const {jwtAuth} = require('../auth');
+
 const jsonParser = bodyParser.json();
 
 const {User} = require('./models');
 const {Article} = require('../articles')
 
-router.get('/', (req, res) => {
+router.get('/', jwtAuth, (req, res) => {
 
   User
     .find()
@@ -20,7 +22,7 @@ router.get('/', (req, res) => {
     .exec(function(err, doc){
       res.send(doc)
     })
-    .then(user => res.status(204).send('here'))
+    .then(user => res.status(204))
 })
 
 router.post('/', jsonParser, (req, res) => {
