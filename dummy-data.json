@@ -1,9 +1,6 @@
 {
-  "users": [{
-    "id": "5a25b9b5a478d95710949362",
     "username": "DemoMode",
     "password": "password",
     "email": "email@email.com",
     "articles": []
-  }]
 }

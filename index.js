@@ -3,7 +3,7 @@
 const {router: userRouter} = require('./users');
 const {router: articleRouter} = require('./articles');
 const {router: authRouter, localStrategy, jwtStrategy} = require('./auth');
-
+const mongoose = require('mongoose');
 const express = require('express');
 const passport = require('passport')
 const cors = require('cors');
@@ -42,15 +42,38 @@ app.use('/api/users/', userRouter);
 app.use('/api/articles/', articleRouter);
 app.use('/api/auth', authRouter);
 
-function runServer(port = PORT) {
-    const server = app
-        .listen(port, () => {
-            console.info(`App listening on port ${server.address().port}`);
+function runServer(databaseUrl=DATABASE_URL, port=PORT) {
+  
+    return new Promise((resolve, reject) => {
+      mongoose.connect(databaseUrl, err =>{
+        if (err) {
+          return reject(err);
+        }
+        server = app.listen(port, () => {
+          console.log(`Your app is listening on port ${port}`);
+          resolve();
         })
-        .on('error', err => {
-            console.error('Express failed to start');
-            console.error(err);
-        });
+          .on('error', err => {
+            mongoose.disconnect();
+            reject(err);
+          });
+      });
+    });
+  }
+
+
+function closeServer() {
+  return mongoose.disconnect().then(() => {
+    return new Promise((resolve, reject) => {
+      console.log('Closing server');
+      server.close(err => {
+        if(err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  });
 }
 
 if (require.main === module) {
@@ -58,4 +81,4 @@ if (require.main === module) {
     runServer();
 }
 
-module.exports = {app};
+module.exports = {app, runServer};
