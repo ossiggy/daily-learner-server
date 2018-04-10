@@ -20,6 +20,7 @@ before(function() {
 });
 
 after(function() {
+    console.log('here')
     return dbDisconnect();
 });
 
