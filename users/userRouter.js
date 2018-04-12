@@ -11,22 +11,6 @@ const jsonParser = bodyParser.json();
 const {User} = require('./models');
 const {Article} = require('../articles')
 
-//does not do anything. Keep in case you want to add a profile page later
-
-// router.get('/', jwtAuth, (req, res) => {
-
-//   User
-//     .find()
-//     .populate({
-//       path: 'article',
-//       model: 'Article',
-//     })  
-//     .exec(function(err, doc){
-//       res.send(doc)
-//     })
-//     .then(user => res.status(204))
-// })
-
 router.post('/', jsonParser, (req, res) => {
   const requiredFields = ['username', 'password', 'email'];
   const missingField = requiredFields.find(field => !(field in req.body));
@@ -41,7 +25,7 @@ router.post('/', jsonParser, (req, res) => {
     });
   };
 
-  const stringFields = ['username', 'password', 'email', 'firstName', 'lasName'];
+  const stringFields = ['username', 'password', 'email'];
   const nonStringField = stringFields.find(
     field => field in req.body && typeof req.body[field] !== 'string'
   );
@@ -106,9 +90,7 @@ router.post('/', jsonParser, (req, res) => {
     });
   }
 
-  let {username, password, email, firstName = '', lastName = ''} = req.body
-  firstName = firstName.trim();
-  lastName = lastName.trim();
+  let {username, password, email} = req.body
 
   return User.find({username})
     .count()
@@ -128,8 +110,6 @@ router.post('/', jsonParser, (req, res) => {
       return User.create({
         username,
         password: hash,
-        firstName,
-        lastName,
         email
       });
     })

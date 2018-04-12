@@ -14,8 +14,6 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  firstName: {type: String, default: ''},
-  lastName: {type: String, default: ''},
   email: {type: mongoose.SchemaTypes.Email, required: true},
   articles: [{type: mongoose.Schema.Types.ObjectId, ref:'Article'}]
 });
@@ -24,8 +22,6 @@ UserSchema.methods.apiRepr = function() {
   return {
     id: this._id,
     username: this.username || '',
-    firstName: this.firstName || '',
-    lastName: this.lastName || ''
   };
 };
 
