@@ -11,6 +11,22 @@ const jsonParser = bodyParser.json();
 const {User} = require('./models');
 const {Article} = require('../articles')
 
+//user profile
+
+router.get('/', jwtAuth, (req, res) => {
+
+  User
+    .find()
+    .populate({
+      path: 'article',
+      model: 'Article',
+    })  
+    .exec(function(err, doc){
+      res.send(doc)
+    })
+    .then(user => res.status(204))
+})
+
 router.post('/', jsonParser, (req, res) => {
   const requiredFields = ['username', 'password', 'email'];
   const missingField = requiredFields.find(field => !(field in req.body));
