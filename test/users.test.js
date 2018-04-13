@@ -26,28 +26,120 @@ function tearDownDb() {
   });
 }
 
-describe('User endpoint', function() {
+describe('User endpoint', () => {
 
-  before(function() {
+  function createMockUser(){
+    console.info('creating mock user');
+    return chai.request(app)
+    .post('/api/users/')
+    .send({username: 'username', password: 'password', email: 'email@email.com'})
+    .catch(err => console.log(err))
+  }
+
+  before(() => {
     return runServer(TEST_DATABASE_URL);
   });
 
-  afterEach(function(){
+  beforeEach(() => {
+    return createMockUser()
+  })
+
+  afterEach(() => {
     return tearDownDb()
   })
 
-  after(function() {
+  after(() => {
       return closeServer();
   });
 
-    it('Should add a new user on POST', function () {
+    it('Should add a new user on POST', () => {
       return chai.request(app)
         .post('/api/users/')
-        .send({username: 'username', password: 'password', email: 'email@email.com'})
-        .then(function(res){
+        .send({username: 'newuser', password: 'password', email: 'newemail@email.com'})
+        .then(res => {
           expect(res.status).to.equal(201);
           const expectedKeys = ['id', 'username']
           expect(res.body).to.include.keys(expectedKeys)
           })
+    })
+
+    it('Should reject a new user with missing fields', () => {
+      return chai.request(app)
+        .post('/api/users')
+        .send({username: 'newuser', email: 'newemail@email.com'})
+        .then(() =>
+          expect.fail(null, null, 'Request should not succeed'))
+        .catch(err => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(422);
+          expect(res.body.message).to.equal('Missing field')
+        });
+    });
+
+    it('Should reject a new user with a non string field', () => {
+      return chai.request(app)
+        .post('/api/users')
+        .send({username: 123456, password:'password', email: 'newemail@email.com'})
+        .then(() =>
+          expect.fail(null, null, 'Request should not succeed'))
+        .catch(err => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(422);
+          expect(res.body.message).to.equal('Incorrect field type: expected string')
+        });
+    });
+
+    it('Should reject a new user with a non trimmed field', () => {
+      return chai.request(app)
+        .post('/api/users')
+        .send({username: ' newuser', password:'password', email: 'newemail@email.com'})
+        .then(() =>
+          expect.fail(null, null, 'Request should not succeed'))
+        .catch(err => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(422);
+          expect(res.body.message).to.equal('Cannot start or end with space')
+        });
+    });
+
+    it('Should reject a new user with incorrect size fields', () => {
+      return chai.request(app)
+        .post('/api/users')
+        .send({username: 'new', password:'password', email: 'newemail@email.com'})
+        .then(() =>
+          expect.fail(null, null, 'Request should not succeed'))
+        .catch(err => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(422);
+          expect(res.body.message).to.equal('Must be at least 5 characters long')
+        });
+    });
+
+    it('Should reject a new user with existing username', () => {
+      return chai.request(app)
+      .post('/api/users/')
+      .send({username: 'username', password: 'password', email: 'email@email.com'})
+      .then(() =>
+      expect.fail(null, null, 'Request should not succeed'))
+      .catch(err => {
+        if (err instanceof chai.AssertionError) {
+          throw err;
+        }
+        const res = err.response;
+        expect(res).to.have.status(422);
+        expect(res.body.message).to.equal('Username unavailable')
+      })
     })
 });
