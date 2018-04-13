@@ -13,7 +13,6 @@ const {app, runServer, closeServer} = require('../index');
 
 const {Article} = require('../articles');
 const {User} = require('../users');
-const {jwtAuth} = require('../auth');
 
 process.env.NODE_ENV = 'test';
 
@@ -25,20 +24,45 @@ const should = chai.should;
 
 chai.use(chaiHttp);
 
-const mockArticle = {
-  title: faker.lorem.word,
-  content: faker.lorem.word,
-  dateCreated: faker.date.past,
-  category: faker.lorem.word
+let authToken;
+
+
+function createMockUser(){
+  console.info('creating mock user');
+  return chai.request(app)
+  .post('/api/users/')
+  .send({username: 'username', password: 'password', email: 'email@email.com'})
+  .then(res => seedArticleData(res.body.id))
+  .then(() => logUserIn())
+  .catch(err => console.log(err))
 }
 
-function seedUserData() {
-  console.info('seeding user data')
-  return User.create(mockUser)
-}
+function seedArticleData(parentID) {
+  console.info('seeding article data');
+  const mockArticle = {
+    title: faker.lorem.word,
+    content: faker.lorem.word,
+    category: faker.lorem.word
+  }
+  return Article.create(mockArticle)
+    .then(article => {
+      article._parent = parentID;
+      return chai.request(app)
+        .post('/api/articles')
+        .send(article)
+        .then(res => console.log(res.body._parent))
+        .catch(err => console.log(err))
+    })
+  .catch(err => console.log(err)) 
+};
 
-function seedArticleData() {
-  console.info('seeding article data')
+function logUserIn(){
+  console.info('logging in');
+  return chai.request(app)
+    .post('/api/auth/login')
+    .send({username: 'username', password: 'password'})
+    .then(res => authToken = res.body.authToken)
+    .catch(err => console.log(err))
 }
 
 function tearDownDb() {
@@ -50,249 +74,50 @@ function tearDownDb() {
   });
 }
 
-describe('User endpoint', function() {
+describe('Article endpoints', () => {
 
-  before(function() {
-    return runServer(TEST_DATABASE_URL);
-  });
+  before(function(){
+    return runServer(TEST_DATABASE_URL)
+  })
+
+  beforeEach(function(){
+    return createMockUser()
+  })
 
   afterEach(function(){
     return tearDownDb()
   })
 
-  after(function() {
-      return closeServer();
-  });
+  after(function(){
+    return closeServer()
+  })
 
-    it('should be properly setup', function() {
-        expect(true).to.be.true;
-    });
-
-    it('Should add a new user on POST', function () {
-      return chai.request(app)
-        .post('/api/users/')
-        .send({username: 'username', password: 'password', email: 'email@email.com'})
-        .then(function(res){
-          expect(res.status).to.equal(201);
-          const expectedKeys = ['id', 'username']
-          expect(res.body).to.include.keys(expectedKeys)
-          })
+  describe('GET endpoint', () => {
+    it('Should return all user articles on root request', () => {
+    let _res;
+    return chai.request(app)
+      .get('/api/articles')
+      .set('Authorization', `Bearer ${authToken}`)
+      .then(function(res){
+        _res = res;
+        console.log(res.body)
+        expect(res.body).to.be.a('array');
+        expect(res).to.be.json;
+        const expectedKeys = ['_parent', 'id', 'title', 'content', 'dateCreated', 'category'];
+        expect(res.body[0]).to.have.keys(expectedKeys);
+        const resArticle = res.body[0];
+        return Article.findById(resArticle.id).exec()
+      })
+      .then(article => {
+        const resArticle = _res.body[0];
+        expect(resArticle._parent).to.deep.equal(`${article._parent}`);
+        expect(resArticle.id).to.deep.equal(article.id);
+        expect(resArticle.title).to.deep.equal(article.title);
+        expect(resArticle.content).to.deep.equal(article.content);
+        expect(resArticle.category).to.deep.equal(article.category);
+      })
     })
-});
+  })
 
-describe('Auth endpoints', function() {
-  const username = 'exampleUser';
-  const password = 'examplePass';
-  const email = 'email@email.com';
-  let _id;
 
-  before(function() {
-      return runServer();
-  });
-
-  after(function() {
-      return closeServer();
-  });
-
-  beforeEach(function() {
-      return User.hashPassword(password).then(password =>
-          User.create({
-              username,
-              password,
-              email
-          })
-      ).then((user) => _id = user.id);
-  });
-
-  afterEach(function() {
-      return User.remove({});
-  });
-
-  describe('/api/auth/login', function() {
-      it('Should reject requests with no credentials', function() {
-          return chai
-              .request(app)
-              .post('/api/auth/login')
-              .then(() =>
-                  expect.fail(null, null, 'Request should not succeed')
-              )
-              .catch(err => {
-                  if (err instanceof chai.AssertionError) {
-                      throw err;
-                  }
-
-                  const res = err.response;
-                  expect(res).to.have.status(400);
-              });
-      });
-      it('Should reject requests with incorrect usernames', function() {
-          return chai
-              .request(app)
-              .post('/api/auth/login')
-              .auth('wrongUsername', password)
-              .then(() =>
-                  expect.fail(null, null, 'Request should not succeed')
-              )
-              .catch(err => {
-                  if (err instanceof chai.AssertionError) {
-                      throw err;
-                  }
-
-                  const res = err.response;
-                  expect(res).to.have.status(400);
-              });
-      });
-      it('Should reject requests with incorrect passwords', function() {
-          return chai
-              .request(app)
-              .post('/api/auth/login')
-              .auth(username, 'wrongPassword')
-              .then(() =>
-                  expect.fail(null, null, 'Request should not succeed')
-              )
-              .catch(err => {
-                  if (err instanceof chai.AssertionError) {
-                      throw err;
-                  }
-
-                  const res = err.response;
-                  expect(res).to.have.status(400);
-              });
-      });
-      it('Should return a valid auth token', function() {
-          return chai
-              .request(app)
-              .post('/api/auth/login')
-              .send({username, password})
-              .then(res => {
-                  expect(res).to.have.status(200);
-                  expect(res.body).to.be.an('object');
-                  const token = res.body.authToken;
-                  expect(token).to.be.a('string');
-                  const payload = jwt.verify(token, JWT_SECRET, {
-                      algorithm: ['HS256']
-                  });
-                  expect(payload.user).to.contain({
-                      username
-                  });
-                  expect(payload.user.id).to.equal(_id);
-              });
-      });
-  });
-
-  describe('/api/auth/refresh', function() {
-      it('Should reject requests with no credentials', function() {
-          return chai
-              .request(app)
-              .post('/api/auth/refresh')
-              .then(() =>
-                  expect.fail(null, null, 'Request should not succeed')
-              )
-              .catch(err => {
-                  if (err instanceof chai.AssertionError) {
-                      throw err;
-                  }
-
-                  const res = err.response;
-                  expect(res).to.have.status(401);
-              });
-      });
-      it('Should reject requests with an invalid token', function() {
-          const token = jwt.sign(
-              {
-                  username,
-                  email
-              },
-              'wrongSecret',
-              {
-                  algorithm: 'HS256',
-                  expiresIn: '7d'
-              }
-          );
-
-          return chai
-              .request(app)
-              .post('/api/auth/refresh')
-              .set('Authorization', `Bearer ${token}`)
-              .then(() =>
-                  expect.fail(null, null, 'Request should not succeed')
-              )
-              .catch(err => {
-                  if (err instanceof chai.AssertionError) {
-                      throw err;
-                  }
-
-                  const res = err.response;
-                  expect(res).to.have.status(401);
-              });
-      });
-      it('Should reject requests with an expired token', function() {
-          const token = jwt.sign(
-              {
-                  user: {
-                      username,
-                      email
-                  },
-                  exp: Math.floor(Date.now() / 1000) - 10 // Expired ten seconds ago
-              },
-              JWT_SECRET,
-              {
-                  algorithm: 'HS256',
-                  subject: username
-              }
-          );
-
-          return chai
-              .request(app)
-              .post('/api/auth/refresh')
-              .set('authorization', `Bearer ${token}`)
-              .then(() =>
-                  expect.fail(null, null, 'Request should not succeed')
-              )
-              .catch(err => {
-                  if (err instanceof chai.AssertionError) {
-                      throw err;
-                  }
-
-                  const res = err.response;
-                  expect(res).to.have.status(401);
-              });
-      });
-      it('Should return a valid auth token with a newer expiry date', function() {
-          const token = jwt.sign(
-              {
-                  user: {
-                      username,
-                      email
-                  }
-              },
-              JWT_SECRET,
-              {
-                  algorithm: 'HS256',
-                  subject: username,
-                  expiresIn: '7d'
-              }
-          );
-          const decoded = jwt.decode(token);
-
-          return chai
-              .request(app)
-              .post('/api/auth/refresh')
-              .set('authorization', `Bearer ${token}`)
-              .then(res => {
-                  expect(res).to.have.status(200);
-                  expect(res.body).to.be.an('object');
-                  const token = res.body.authToken;
-                  expect(token).to.be.a('string');
-                  const payload = jwt.verify(token, JWT_SECRET, {
-                      algorithm: ['HS256']
-                  });
-                  expect(payload.user).to.deep.equal({
-                      username,
-                      email
-                  });
-                  expect(payload.exp).to.be.at.least(decoded.exp);
-              });
-      });
-  });
-});
+})
