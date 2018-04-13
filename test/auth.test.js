@@ -47,8 +47,8 @@ describe('Auth endpoints', function() {
       return User.remove({});
   });
 
-  describe('/api/auth/login', function() {
-      it('Should reject requests with no credentials', function() {
+  describe('/api/auth/login', () => {
+      it('Should reject requests with no credentials', () => {
           return chai
               .request(app)
               .post('/api/auth/login')
@@ -64,7 +64,7 @@ describe('Auth endpoints', function() {
                   expect(res).to.have.status(400);
               });
       });
-      it('Should reject requests with incorrect usernames', function() {
+      it('Should reject requests with incorrect usernames', () => {
           return chai
               .request(app)
               .post('/api/auth/login')
@@ -81,7 +81,7 @@ describe('Auth endpoints', function() {
                   expect(res).to.have.status(400);
               });
       });
-      it('Should reject requests with incorrect passwords', function() {
+      it('Should reject requests with incorrect passwords', () => {
           return chai
               .request(app)
               .post('/api/auth/login')
@@ -98,7 +98,7 @@ describe('Auth endpoints', function() {
                   expect(res).to.have.status(400);
               });
       });
-      it('Should return a valid auth token', function() {
+      it('Should return a valid auth token', () => {
           return chai
               .request(app)
               .post('/api/auth/login')
@@ -119,8 +119,8 @@ describe('Auth endpoints', function() {
       });
   });
 
-  describe('/api/auth/refresh', function() {
-      it('Should reject requests with no credentials', function() {
+  describe('/api/auth/refresh', () => {
+      it('Should reject requests with no credentials', () => {
           return chai
               .request(app)
               .post('/api/auth/refresh')
@@ -136,7 +136,7 @@ describe('Auth endpoints', function() {
                   expect(res).to.have.status(401);
               });
       });
-      it('Should reject requests with an invalid token', function() {
+      it('Should reject requests with an invalid token', () => {
           const token = jwt.sign(
               {
                   username,
@@ -165,7 +165,7 @@ describe('Auth endpoints', function() {
                   expect(res).to.have.status(401);
               });
       });
-      it('Should reject requests with an expired token', function() {
+      it('Should reject requests with an expired token', () => {
           const token = jwt.sign(
               {
                   user: {
@@ -197,7 +197,7 @@ describe('Auth endpoints', function() {
                   expect(res).to.have.status(401);
               });
       });
-      it('Should return a valid auth token with a newer expiry date', function() {
+      it('Should return a valid auth token with a newer expiry date', () => {
           const token = jwt.sign(
               {
                   user: {
