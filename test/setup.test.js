@@ -24,47 +24,6 @@ const should = chai.should;
 
 chai.use(chaiHttp);
 
-let authToken;
-
-
-function createMockUser(){
-  console.info('creating mock user');
-  return chai.request(app)
-  .post('/api/users/')
-  .send({username: 'username', password: 'password', email: 'email@email.com'})
-  .then(res => seedArticleData(res.body.id))
-  .then(() => logUserIn())
-  .catch(err => console.log(err))
-}
-
-function seedArticleData(parentID) {
-  console.info('seeding article data');
-  const mockArticle = {
-    title: faker.lorem.word,
-    content: faker.lorem.word,
-    category: faker.lorem.word
-  }
-  return Article.create(mockArticle)
-    .then(article => {
-      article._parent = parentID;
-      return chai.request(app)
-        .post('/api/articles')
-        .send(article)
-        .then(res => console.log(res.body._parent))
-        .catch(err => console.log(err))
-    })
-  .catch(err => console.log(err)) 
-};
-
-function logUserIn(){
-  console.info('logging in');
-  return chai.request(app)
-    .post('/api/auth/login')
-    .send({username: 'username', password: 'password'})
-    .then(res => authToken = res.body.authToken)
-    .catch(err => console.log(err))
-}
-
 function tearDownDb() {
   return new Promise((resolve, reject) => {
     console.warn('Deleting database');
@@ -76,12 +35,50 @@ function tearDownDb() {
 
 describe('Article endpoints', () => {
 
+  let authToken;
+  let articleID;
+    
+  const mockArticle = {
+    title: faker.lorem.word,
+    content: faker.lorem.word,
+    category: faker.lorem.word
+  }
+
+  function createMockUser(){
+    console.info('creating mock user');
+    return chai.request(app)
+    .post('/api/users/')
+    .send({username: 'username', password: 'password', email: 'email@email.com'})
+    .then(res => seedArticleData(res.body.id))
+    .then(() => logUserIn())
+    .catch(err => console.log(err))
+  }
+  
+  function seedArticleData(parentID) {
+    console.info('seeding article data');
+    return Article.create(mockArticle)
+      .then(article => {
+        article._parent = parentID;
+        return chai.request(app)
+          .post('/api/articles')
+          .send(article)
+          .then(res => articleID = res.body.id)
+          .catch(err => console.log(err))
+      })
+    .catch(err => console.log(err)) 
+  };
+  
+  function logUserIn(){
+    console.info('logging in');
+    return chai.request(app)
+      .post('/api/auth/login')
+      .send({username: 'username', password: 'password'})
+      .then(res => authToken = res.body.authToken)
+      .catch(err => console.log(err))
+  }
+
   before(function(){
     return runServer(TEST_DATABASE_URL)
-  })
-
-  beforeEach(function(){
-    return createMockUser()
   })
 
   afterEach(function(){
@@ -92,7 +89,12 @@ describe('Article endpoints', () => {
     return closeServer()
   })
 
-  describe('GET endpoint', () => {
+  describe('GET requests', () => {
+
+    beforeEach(function(){
+      return createMockUser()
+    })
+
     it('Should return all user articles on root request', () => {
     let _res;
     return chai.request(app)
@@ -100,7 +102,6 @@ describe('Article endpoints', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .then(function(res){
         _res = res;
-        console.log(res.body)
         expect(res.body).to.be.a('array');
         expect(res).to.be.json;
         const expectedKeys = ['_parent', 'id', 'title', 'content', 'dateCreated', 'category'];
@@ -117,7 +118,61 @@ describe('Article endpoints', () => {
         expect(resArticle.category).to.deep.equal(article.category);
       })
     })
+
+    it('Should return a specific article on GET by id', () => {
+      let _res;
+      return chai.request(app)
+        .get(`/api/articles/${articleID}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .then(function(res){
+          _res = res;
+          expect(res.body).to.be.a('object');
+          expect(res).to.be.json;
+          const expectedKeys = ['_parent', 'id', 'title', 'content', 'dateCreated', 'category'];
+          expect(res.body).to.have.keys(expectedKeys);
+          const resArticle = res.body;
+          return Article.findById(resArticle.id).exec()
+        })
+        .then(article => {
+          const resArticle = _res.body;
+          expect(resArticle._parent).to.deep.equal(`${article._parent}`);
+          expect(resArticle.id).to.deep.equal(article.id);
+          expect(resArticle.title).to.deep.equal(article.title);
+          expect(resArticle.content).to.deep.equal(article.content);
+          expect(resArticle.category).to.deep.equal(article.category);
+        })
+    })
   })
 
-
+  describe('POST requests', () => {
+    
+    it('Should post the article on root request', () => {
+      let _res;
+      Article.create(mockArticle)
+        .then(article => {
+          article._parent = new ObjectID;
+          return chai.request(app)
+          .post('/api/articles')
+          .send(article)
+          .then(function(res) {
+            _res = res;
+            expect(res.body).to.have.status(201)
+            expect(res.body).to.be.a('object');
+            expect(res).to.be.json;
+            const expectedKeys = ['_parent', 'id', 'title', 'content', 'dateCreated', 'category'];
+            expect(res.body).to.have.keys(expectedKeys);
+            const resArticle = res.body;
+            return Article.findById(resArticle.id).exec()
+          })
+          .then(article => {
+            const resArticle = _res.body;
+            expect(resArticle._parent).to.deep.equal(`${article._parent}`);
+            expect(resArticle.id).to.deep.equal(article.id);
+            expect(resArticle.title).to.deep.equal(article.title);
+            expect(resArticle.content).to.deep.equal(article.content);
+            expect(resArticle.category).to.deep.equal(article.category);
+          })
+        })
+    })
+  })
 })
