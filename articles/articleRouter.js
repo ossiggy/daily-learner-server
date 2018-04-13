@@ -74,7 +74,7 @@ router.post('/', jsonParser, (req, res) => {
 });
 
 router.put('/:id', jwtAuth, jsonParser, (req, res) => {
-  if(!(req.params.id && req.body.id && req.params.id)){
+  if(!(req.params.id === req.body.id)){
     const message = (
       `Request patch id (${req.params.id} and request body id (${req.body.id}) must match)`);
     console.error(message);
