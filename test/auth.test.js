@@ -19,21 +19,21 @@ const should = chai.should;
 
 chai.use(chaiHttp);
 
-describe('Auth endpoints', function() {
+describe('Auth endpoints', () => {
   const username = 'exampleUser';
   const password = 'examplePass';
   const email = 'email@email.com';
   let _id;
 
-  before(function() {
+  before(() => {
       return runServer();
   });
 
-  after(function() {
+  after(() => {
       return closeServer();
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
       return User.hashPassword(password).then(password =>
           User.create({
               username,
@@ -43,7 +43,7 @@ describe('Auth endpoints', function() {
       ).then((user) => _id = user.id);
   });
 
-  afterEach(function() {
+  afterEach(() => {
       return User.remove({});
   });
 
