@@ -47,7 +47,7 @@ describe('Article endpoints', () => {
     return chai.request(app)
     .post('/api/users/')
     .send({username: 'username', password: 'password', email: 'email@email.com'})
-    .then(res => seedArticleData(res.body.id))
+    .then(res =>  seedArticleData(res.body.id))
     .then(() => logUserIn())
     .catch(err => console.log(err))
   }
@@ -60,7 +60,7 @@ describe('Article endpoints', () => {
         return chai.request(app)
           .post('/api/articles')
           .send(article)
-          .then(res => articleID = res.body.id)
+          .then(res =>  articleID = res.body.id)
           .catch(err => console.log(err))
       })
     .catch(err => console.log(err)) 
@@ -75,22 +75,39 @@ describe('Article endpoints', () => {
       .catch(err => console.log(err))
   }
 
-  before(function(){
+  before(() => {
     return runServer(TEST_DATABASE_URL)
   })
 
-  afterEach(function(){
+  afterEach(() => {
     return tearDownDb()
   })
 
-  after(function(){
+  after(() => {
     return closeServer()
   })
 
   describe('GET requests', () => {
 
-    beforeEach(function(){
+    beforeEach(() => {
       return createMockUser()
+    })
+
+    it('Should reject unauthorized requests', () => {
+      return chai.request(app)
+        .get('/api/articles')
+        .set('Autorization', 'Bearer IamAuthorized')
+        .then(() =>
+          expect.fail(null, null, 'Request should not succeed'))
+        .catch(err => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(401);
+          expect(res.text).to.equal('Unauthorized')
+      });
+
     })
 
     it('Should return all user articles on root request', () => {
@@ -98,7 +115,7 @@ describe('Article endpoints', () => {
     return chai.request(app)
       .get('/api/articles')
       .set('Authorization', `Bearer ${authToken}`)
-      .then(function(res){
+      .then(res => {
         _res = res;
         expect(res.body).to.be.a('array');
         expect(res).to.be.json;
@@ -122,7 +139,7 @@ describe('Article endpoints', () => {
       return chai.request(app)
         .get(`/api/articles/${articleID}`)
         .set('Authorization', `Bearer ${authToken}`)
-        .then(function(res){
+        .then(res => {
           _res = res;
           expect(res.body).to.be.a('object');
           expect(res).to.be.json;
@@ -142,7 +159,23 @@ describe('Article endpoints', () => {
     })
   })
 
+
   describe('POST requests', () => {
+
+    it('Should reject articles with missing fields', () => {
+      return chai.request(app)
+      .post('/api/articles')
+      .send({title: 'title', content: 'content'})
+      .then(() =>
+          expect.fail(null, null, 'Request should not succeed'))
+        .catch(err => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(500);
+      });
+    });
     
     it('Should post the article on root request', () => {
       let _res;
@@ -152,7 +185,7 @@ describe('Article endpoints', () => {
           return chai.request(app)
           .post('/api/articles')
           .send(article)
-          .then(function(res) {
+          .then(res => {
             _res = res;
             expect(res).to.have.status(201)
             expect(res.body).to.be.a('object');
@@ -180,6 +213,47 @@ describe('Article endpoints', () => {
       return createMockUser()
     })
 
+    it('Should reject unauthorized requests', () => {
+      return chai.request(app)
+        .put(`/api/articles/${articleID}`)
+        .set('Authorization', 'Bearer IamAuthorized099')
+        .then(() =>
+          expect.fail(null, null, 'Request should not succeed'))
+        .catch(err => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(401);
+          expect(res.text).to.equal('Unauthorized')
+        });
+    })
+
+    it('Should reject requests with wrong article id', () => {
+
+      const falseArticle = {
+        'id': '123456789',
+        'title': 'New Title',
+        'content': 'New Content',
+        'category': 'New Category'
+      }
+
+      return chai.request(app)
+      .put(`/api/articles/${articleID}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send(falseArticle)
+      .then(() =>
+        expect.fail(null, null, 'Request should not succeed'))
+      .catch(err => {
+        if (err instanceof chai.AssertionError) {
+          throw err;
+        }
+        const res = err.response;
+        expect(res).to.have.status(400);
+        expect(res.body.message).to.equal(`Request patch id (${articleID} and request body id (123456789) must match)`)
+      });
+    })
+
     it('Should update the correct article by id', () => {
       const updatedArticle = {
         'id': articleID,
@@ -192,7 +266,7 @@ describe('Article endpoints', () => {
       .put(`/api/articles/${articleID}`)
       .set('Authorization', `Bearer ${authToken}`)
       .send(updatedArticle)
-      .then(function(res){
+      .then(res => {
         expect(res).to.have.status(204);
         return Article.findById(articleID).exec()
       })
@@ -210,11 +284,26 @@ describe('Article endpoints', () => {
       return createMockUser()
     })
 
+    it('Should reject unauthorized requests', () => {
+      return chai.request(app)
+        .delete(`/api/articles/${articleID}`)
+        .then(() =>
+          expect.fail(null, null, 'Request should not succeed'))
+        .catch(err => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(401);
+          expect(res.text).to.equal('Unauthorized');
+        })
+    })
+
     it('Should delete the correct article by id', () => {
       return chai.request(app)
         .delete(`/api/articles/${articleID}`)
         .set('Authorization', `Bearer ${authToken}`)
-        .then(function(res){
+        .then(res => {
           expect(res).to.have.status(204)
         })
     })
