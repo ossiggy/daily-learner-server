@@ -73,7 +73,7 @@ router.post('/', jsonParser, (req, res) => {
     });   
 });
 
-router.put('/:id', jsonParser, (req, res) => {
+router.put('/:id', jwtAuth, jsonParser, (req, res) => {
   if(!(req.params.id && req.body.id && req.params.id)){
     const message = (
       `Request patch id (${req.params.id} and request body id (${req.body.id}) must match)`);
@@ -97,7 +97,7 @@ router.put('/:id', jsonParser, (req, res) => {
     .catch(err => res.status(500).json({message: 'Internal server error'}));
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', jwtAuth, (req, res) => {
   Article
     .findByIdAndRemove(req.params.id)
     .exec()
