@@ -1,17 +1,17 @@
 {
-  "name": "thinkful-backend-template",
+  "name": "daily-learner-server",
   "version": "1.0.0",
-  "description": "Template for an Express backend",
+  "description": "Daily Learner Server",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "test": "mocha --colors  test/setup.test.js */*.test.js",
+    "test": "mocha --colors test */*.test.js",
     "cover": "nodemon --exec nyc --reporter=lcov --reporter=text-summary mocha test/setup.test.js */*.test.js",
     "heroku": "node index.js",
     "travis": "mocha test/setup.test.js */*.test.js"
   },
-  "author": "Joe Turner <jturner@thinkful.com>",
-  "license": "MIT",
+  "author": "Ossiggy",
+  "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
